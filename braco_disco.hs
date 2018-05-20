@@ -11,27 +11,59 @@ ler_entrada = do
     let lista = [ x | p <- linhas, let x = read p :: Int ]
     return lista
 
--- ------------------------------------------------- |
+calc_diferencas :: Int -> [Int] -> [Int]
+calc_diferencas _ [] = []
+calc_diferencas atual (proximo:outros) =
+    abs(proximo - atual):(calc_diferencas proximo outros)
+
+
+
+
+-- -------------------------------------------------
+-- Shortest Seek-Time First
+-- -------------------------------------------------
+
+-- Calcula a proxima requisicao apartir da posicao da cabeca
+-- as requisicoes tem que estar ordenadas
+
+calc_prox_sstf :: Int -> Int -> Int -> [Int] -> [Int] -> (Int, [Int])
+calc_prox_sstf _ atual _ [] requisicoes_faltantes = (atual, requisicoes_faltantes)
+calc_prox_sstf cabeca atual dif_atual requisicoes requisicoes_faltantes
+  | dif_prox > dif_atual = (atual, requisicoes_faltantes ++ requisicoes)
+  | otherwise = calc_prox_sstf cabeca prox dif_prox prox_requisicoes (requisicoes_faltantes ++ [atual])
+     where  (prox:prox_requisicoes) = requisicoes
+            dif_prox = abs(cabeca - prox)
+
+-- Calcula a lista de requisicoes do SSFT
+-- A lista de requisicoes tem que estar ordenada
+calc_requisicoes_sstf :: Int -> [Int] -> [Int]
+calc_requisicoes_sstf _ [] = []
+calc_requisicoes_sstf cabeca requisicoes = prox : (calc_requisicoes_sstf prox req')
+    where   (prox, req') = calc_prox_sstf cabeca atual dif_atual req []
+            (atual:req) = requisicoes
+            dif_atual = abs(cabeca - atual)
+
+
+sstf :: Int -> [Int] -> Int
+sstf _ [] = 0
+sstf inicio requisicoes = sum diferencas_sstf
+    where   diferencas_sstf = calc_diferencas inicio req
+            req = calc_requisicoes_sstf inicio (qsort requisicoes)
+-- -------------------------------------------------
 -- ELEVADOR
--- ------------------------------------------------- |
-diferencas_elevador :: Int -> [Int] -> [Int]
-diferencas_elevador _ [] = []
-diferencas_elevador atual (proximo:outros) =
-    abs(proximo - atual):(diferencas_elevador proximo outros)
-
-
+-- -------------------------------------------------
 elevador :: Int -> [Int] -> Int
-elevador inicio requisicoes = sum diferencas
+elevador _ [] = 0
+elevador inicio requisicoes = sum diferencas_elevador
     where   requisicoes_sort = qsort requisicoes
             maiores = filter (>= inicio) requisicoes_sort
             menores = filter (< inicio) requisicoes_sort
             requisicoes_elevador = maiores ++ (reverse menores)
-            diferencas = diferencas_elevador inicio requisicoes_elevador
-
+            diferencas_elevador = calc_diferencas inicio requisicoes_elevador
 
 main = do
     lista_entrada <- ler_entrada
     print lista_entrada
     let (total:inicio:requisicoes) = lista_entrada
+    print (sstf inicio requisicoes)
     print (elevador inicio requisicoes)
-
