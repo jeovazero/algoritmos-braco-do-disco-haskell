@@ -20,11 +20,11 @@
 
    - Compilando
 
-     ```ghc algoritmo_braco.hs -o nome_do_executavel```
+     ```ghc algoritmos_braco.hs -o nome_do_executavel```
 
    - Executando
 
-     ```nome_do_executavel < arquivo_de_entrada```
+     ```./nome_do_executavel < arquivo_de_entrada```
 
 ##### Formato arquivo de entrada
 
